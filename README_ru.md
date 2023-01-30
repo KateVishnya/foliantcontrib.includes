@@ -65,17 +65,17 @@ preprocessors:
 >           foo: https://github.com/boo/bar.git
 >           baz: https://github.com/foo/far.git#develop
 >```
-
-чтобы включить контент из файла `doc.md` в этих репозиториях, используйте следующий синтаксис:
-
-``` markdown
-
-    <include>$foo$path/to/doc.md</include>
-
-    <include>$baz#master$path/to/doc.md</include>
-```
-
-Обратите внимание, что во втором примере ветка `develop` будет заменена на `master`.
+>
+>чтобы включить контент из файла `doc.md` в этих репозиториях, используйте следующий синтаксис:
+>
+>``` markdown
+>
+>    <include>$foo$path/to/doc.md</include>
+>
+>   <include>$baz#master$path/to/doc.md</include>
+>```
+>
+>Обратите внимание, что во втором примере ветка `develop` будет заменена на `master`.
 
 ## Синтаксис препроцессора
 
