@@ -93,7 +93,9 @@ preprocessors:
 
 #### Атрибуты
 
-1. `src`: путь к локальному файлу, который нужно включить.
+1. `src`
+
+   Путь к локальному файлу, который нужно включить.
 
 **Пример:**
 
@@ -103,46 +105,50 @@ preprocessors:
 <include src="path/to/another/document.md"></include>
 ```
 
-2. `url`: HTTP(S) URL контента, который должен быть включён.
+2. `url`
 
-**Пример:**
+   HTTP(S) URL контента, который должен быть включён.
 
-```markdown
-Приведенный ниже текст взят из удаленного репозитория в ветке по умолчанию.
+    **Пример:**
 
-<include url="https://github.com/foo/bar/path/to/doc.md"></include>
-```
+    ```markdown
+    Приведенный ниже текст взят из удаленного репозитория в ветке по умолчанию.
 
-> **Примечание**
->
-> Для проектов, расположенных в GitHub, необходимо указать полный путь к raw-файлу, не указывая при этом расширение файла `.md`.
->
->  ``` markdown
->   <include url="https://github.com/path/to/doc/raw/master/doc" nohead="true"></include>
->   ```
->
-> Для проектов, расположенных в GitLab, необходимо указать полный путь к raw-файлу и указать расширение файла `.md`.
->
->    ```markdown
->    <include url="https://gitlub.com/path/to/doc/raw/master/doc.md" nohead="true"></include>
->    ```
+    <include url="https://github.com/foo/bar/path/to/doc.md"></include>
+    ```
 
-3. `repo_url`: полный URL удаленного репозитория Git без изменений.
+    > **Примечание**
+    >
+    > Для проектов, расположенных в GitHub, необходимо указать полный путь к raw-файлу, не указывая при этом расширение файла `.md`.
+    >
+    >  ``` markdown
+    >   <include url="https://github.com/path/to/doc/raw/master/doc" nohead="true"></include>
+    >   ```
+    >
+    > Для проектов, расположенных в GitLab, необходимо указать полный путь к raw-файлу и указать расширение файла `.md`.
+    >
+    >    ```markdown
+    >    <include url="https://gitlub.com/path/to/doc/raw/master/doc.md" nohead="true"></include>
+    >    ```
+
+3. `repo_url`
+
+   Полный URL удаленного репозитория Git без изменений.
 
    `path`: путь к файлу внутри удаленного репозитория Git.
    Необходимо знать полный URL для удаленного репозитория, так как `aliases` здесь не поддерживаются.
 
->**Примечание**
->
->`path` - обязательный параметр! Его отсутствие приведёт к неккоректной работе препроцессора.
+    >**Примечание**
+    >
+    >`path` - обязательный параметр! Его отсутствие приведёт к неккоректной работе препроцессора.
 
-**Пример:**
+    **Пример:**
 
-```markdown
-Text below is taken from a remote repository.
+    ```markdown
+    Text below is taken from a remote repository.
 
-<include repo_url="https://github.com/foo/bar.git" path="path/to/doc.md"></include>
-```
+    <include repo_url="https://github.com/foo/bar.git" path="path/to/doc.md"></include>
+    ```
 
 #### Дополнительные атрибуты
 
@@ -150,15 +156,17 @@ Text below is taken from a remote repository.
 >
 > Foliant 1.0.9 поддерживает обработку значений атрибутов в формате YAML. Можно предварять значения атрибутов модификаторами `!path`, `!project_path` и `!rel_path` (т.е. тегами YAML). Эти модификаторы могут быть полезны в атрибутах `src`, `path` и `project_root`.
 
-1. `revision`: ветка в Git репозитории.
+1. `revision`
 
-**Пример:**
+   Ветка в Git репозитории.
 
-```markdown
-Приведенный ниже текст взят из удаленного репозитория с ветки `develop`.
+    **Пример:**
 
-<include repo_url="https://github.com/foo/bar.git" revision="develop" path="path/to/doc.md"></include>
-```
+    ```markdown
+    Приведенный ниже текст взят из удаленного репозитория с ветки `develop`.
+
+    <include repo_url="https://github.com/foo/bar.git" revision="develop" path="path/to/doc.md"></include>
+    ```
 
 2. `from_heading`
 
@@ -167,6 +175,7 @@ Text below is taken from a remote repository.
    *Заголовок, на который дана ссылка, тоже включается.*
 
 3. `to_heading`
+
    Полное содержимое конечного заголовка, когда необходимо включить некоторую часть содержимого файла, на который ссылается ссылка.
 
    *Заголовок, на который дана ссылка, не включается.*
@@ -183,9 +192,9 @@ Text below is taken from a remote repository.
 
    *Идентификатор не будет включен.*
 
-> **Примечание:**
->
-> Если вы хотите, чтобы функции `from_id` и `to_id` работали с [anchors](https://foliant-docs.github.io/docs/preprocessors/anchors/) (якорями), убедитесь, что препроцессор anchors  указан *после* includes в foliant.yml.
+    > **Примечание:**
+    >
+    > Если вы хотите, чтобы функции `from_id` и `to_id` работали с [anchors](https://foliant-docs.github.io/docs/preprocessors/anchors/) (якорями), убедитесь, что препроцессор anchors  указан *после* includes в foliant.yml.
 
 6. `to_end`
 
