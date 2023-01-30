@@ -14,7 +14,7 @@ $ pip install foliantcontrib.includes
 
 ## Настройка
 
-Для подключения препроцессора добавьте `includes` в секцию `preprocessors` в файле настроек проекта `foliant.yml`.
+Для подключения препроцессора добавьте `includes` в секцию `preprocessors` в файле настроек проекта (конфигурационный файл) `foliant.yml`.
 
 ```yaml
 preprocessors:
@@ -48,55 +48,95 @@ preprocessors:
 :   Праметр определяет, следует ли обрабатывать включения во включенных документах.
 
 `extensions`
-:   List of file extensions that defines the types of files which should be processed looking for include statements. Might be useful if you need to include some content from third-party sources into non-Markdown files like configs, templates, reports, etc. Defaults to `[md]`.
+:   Список расширений файлов, определяющий типы файлов, которые должны быть обработаны при поиске инструкций include. Может быть полезно, если вам нужно включить некоторый контент из сторонних не markodown источников в свои файлы, такие как конфигурации, шаблоны, отчеты и т.д. Значение по умолчанию равно `[md]`.
 
 `aliases`
-:   Mapping from aliases to Git repository URLs. Once defined here, an alias can be used to refer to the repository instead of its full URL.
+:   Сопоставление псевдонимов с URL-адресами репозитория Git. После определения этого параметра псевдоним может использоваться для ссылки на репозиторий вместо его полного URL-адреса.
 
-    >    **Note**
+    >    **Внимание!**
     >
-    >    Aliases are available only within the legacy syntax of include statements (see below).
+    >    Псевдонимы доступны только в рамках устаревшего синтаксиса инструкций include (см. ниже)
 
-    For example, if you set this alias in the config:
+    Например, если необходимо установить псевдоним в конфигурационном файле:
 
         - includes:
             aliases:
                 foo: https://github.com/boo/bar.git
                 baz: https://github.com/foo/far.git#develop
 
-    you can include the content of `doc.md` files from these repositories using the following syntax:
+    чтобы включить контент из файла `doc.md` в этих репозиториях, используйте следующий синтаксис:
 
         <include>$foo$path/to/doc.md</include>
 
         <include>$baz#master$path/to/doc.md</include>
 
-    Note that in the second example the default revision (`develop`) will be overridden with the custom one (`master`).
+    Обратите внимание, что во втором примере ветка `develop` будет заменена на `master`.
 
-## Usage
+## Синтаксис препроцессора
 
-The preprocessor allows two syntax variants for include statements.
+Препроцессор допускает два варианта синтаксиса для инструкций `include`
 
-The **legacy** syntax is simpler and shorter but less flexible. There are no plans to extend it.
+**Устаревший** синтаксис проще и короче, но менее гибок.
+Развитие данного синтаксиса не предполагается.
 
-The **new** syntax introduced in version 1.1.0 is stricter and more flexible. It is more suitable for complex cases, and it can be easily extended in the future. This is the preferred syntax.
+**Новый** синтаксис, введенный в версии 1.1.0, является более строгим и гибким.
+Он больше подходит для сложных случаев, и его можно легко расширить в будущем.
+Это предпочтительный синтаксис.
 
-Both variants of syntax use the `<include>...</include>` tags.
+Оба варианта используют теги `<include></include>`.
 
-If the included file is specified between the tags, it’s the legacy syntax. If the file is referenced in the tag attributes (`src`, `repo_url`, `path`), it’s the new one.
+Если включаемый файл указан между тегами, это устаревший синтаксис. Если на файл есть ссылка в атрибутах тега (`src`, `repo_url`, `path`), это новый синтаксис.
 
-### The New Syntax
+### Использование нового синтаксиса инструкций includes
 
-To enforce using the new syntax rules, put no content between `<include>...</include>` tags, and specify a local file or a file in a remote Git repository in tag attributes.
+Для включения нужного контента, укажите его в атрибутах тега `<include></include>`
 
-To include a local file, use the `src` attribute:
+#### Атрибуты
+
+1. `src`: путь к локальному файлу, который нужно включить.
+
+**Пример:**
 
 ```markdown
-Text below is taken from another document.
+Приведенный ниже текст взят из другого документа.
 
 <include src="path/to/another/document.md"></include>
 ```
 
-To include a file from a remote Git repository, use the `repo_url` and `path` attributes:
+2. `url`: HTTP(S) URL контента, который должен быть включён.
+
+**Пример:**
+
+```markdown
+Приведенный ниже текст взят из удаленного репозитория в ветке по умолчанию.
+
+<include url="https://github.com/foo/bar/path/to/doc.md"></include>
+```
+
+> **Примечание**
+>
+> Для проектов, расположенных в GitHub, необходимо указать полный путь к raw-файлу, не указывая при этом расширение файла `.md`.
+>
+>  ``` markdown
+>   <include url="https://github.com/path/to/doc/raw/master/doc" nohead="true"></include>
+>   ```
+>
+> Для проектов, расположенных в GitLab, необходимо указать полный путь к raw-файлу и указать расширение файла `.md`.
+>
+>    ```markdown
+>    <include url="https://gitlub.com/path/to/doc/raw/master/doc.md" nohead="true"></include>
+>    ```
+
+3. `repo_url`: полный URL удаленного репозитория Git без изменений.
+
+   `path`: путь к файлу внутри удаленного репозитория Git.
+   Необходимо знать полный URL для удаленного репозитория, так как `aliases` здесь не поддерживаются.
+
+>**Примечание**
+>
+>`path` - обязательный параметр! Его отсутствие приведёт к неккоректной работе препроцессора.
+
+**Пример:**
 
 ```markdown
 Text below is taken from a remote repository.
@@ -104,39 +144,82 @@ Text below is taken from a remote repository.
 <include repo_url="https://github.com/foo/bar.git" path="path/to/doc.md"></include>
 ```
 
-You have to specify the full remote repository URL in the `repo_url` attribute, aliases are not supported here.
+#### Дополнительные атрибуты
 
-Optional branch or revision can be specified in the `revision` attribute:
+> **Примечание:**
+>
+> Foliant 1.0.9 поддерживает обработку значений атрибутов в формате YAML. Можно предварять значения атрибутов модификаторами `!path`, `!project_path` и `!rel_path` (т.е. тегами YAML). Эти модификаторы могут быть полезны в атрибутах `src`, `path` и `project_root`.
+
+1. `revision`: ветка в Git репозитории.
+
+**Пример:**
 
 ```markdown
-Text below is taken from a remote repository on branch develop.
+Приведенный ниже текст взят из удаленного репозитория с ветки `develop`.
 
 <include repo_url="https://github.com/foo/bar.git" revision="develop" path="path/to/doc.md"></include>
 ```
 
-To include a text from HTTP(S) URL use the `url` attributes:
+2. `from_heading`
 
-```markdown
-Text below is taken from a remote repository on the default branch.
+   Полное содержимое начального заголовка, когда необходимо включить некоторую часть содержимого файла, на который дана ссылка. Если атрибуты `to_heading`, `to_id` или `to_end` не указаны, препроцессор сокращает включенное содержимое до следующего заголовка того же уровня.
 
-<include url="https://github.com/foo/bar/path/to/doc.md"></include>
-```
+   *Заголовок, на который дана ссылка, тоже включается.*
 
-> **Note**
+3. `to_heading`
+   Полное содержимое конечного заголовка, когда необходимо включить некоторую часть содержимого файла, на который ссылается ссылка.
+
+   *Заголовок, на который дана ссылка, не включается.*
+
+4. `from_id`
+
+   Идентификатор начального заголовка или начальной привязки, когда необходимо включить некоторую часть содержимого файла, на который указывает ссылка. Атрибут `from_id` имеет более высокий приоритет, чем `from_heading`. Если атрибуты `to_heading`, `to_id` или `to_end` не указаны, препроцессор сокращает включенное содержимое до следующего заголовка того же уровня.
+
+   *Указанный идентификатор включается.*
+
+5. `to_id`
+
+   Идентификатор конечного заголовка или конечной привязки, когда необходимо включить некоторую часть содержимого файла, на который указывает ссылка. Атрибут `to_id` имеет более высокий приоритет, чем `to_heading`.
+
+   *Идентификатор не будет включен.*
+
+> **Примечание:**
 >
-> For projects in GitHub, you must specify the full path to the raw file, while not specifying the file extension `.md`.
-    
-``` markdown
-<include url="https://github.com/path/to/doc/raw/master/doc" nohead="true"></include>
-```
+> Если вы хотите, чтобы функции `from_id` и `to_id` работали с [anchors](https://foliant-docs.github.io/docs/preprocessors/anchors/) (якорями), убедитесь, что препроцессор anchors  указан *после* includes в foliant.yml.
 
-> For projects in GitLab, you must specify the full path to the raw file, and you must specify the file extension `.md`.
+6. `to_end`
 
-```markdown
-<include url="https://gitlub.com/path/to/doc/raw/master/doc.md" nohead="true"></include>
-```
+   Флаг, указывающий препроцессору обрезать включенный контент до конца. В противном случае, если указано `from_heading` или `from_id`, препроцессор сокращает включенное содержимое до следующего заголовка того же уровня, что и начальный заголовок, или заголовка, который предшествует начальной привязке.
 
-To include a code snippet, use `wrap_code` and `code_language` attributes:
+   Пример:
+
+        ```markdown
+        ## Some Heading {#custom_id}
+
+        <anchor>one_more_custom_id</anchor>
+        ```markdown
+
+   Здесь `Some Heading {#custom_id}` - это полное содержимое заголовка, `custom_id` - его идентификатор, а `one_more_custom_id` - идентификатор привязки.
+
+7. `wrap_code`
+
+   Атрибут, который позволяет пометить включенный контент как блок кода ограждения или встроенный код, обернув содержимое дополнительными синтаксическими конструкциями Markdown.
+
+   Доступные значения:
+
+   `triple_backticks` — для добавления тройных обратных ссылок, разделенных новыми строками, до и после включенного содержимого;
+
+   `triple_tildas` — для выполнения того же, но с использованием тройных тильд;
+
+   `single_backticks` — для добавления одиночных обратных ссылок до и после включенного содержимого без добавления дополнительных новых строк. Обратите внимание, что этот атрибут не влияет на включенный контент.
+
+   Таким образом, если содержимое состоит из нескольких строк и установлен атрибут `wrap_code` со значением `single_backticks`, все новые строки в содержимом будут сохранены. Чтобы выполнить принудительное преобразование нескольких строк в одну, используйте атрибут `inline`.
+
+8. `code_language`
+
+   Язык включенного фрагмента кода, который должен быть дополнительно помечен как блок кода ограждения с помощью атрибута `wrap_code` со значением `triple_backticks` или `triple_tildas`. Обратите внимание, что атрибут `code_language` не действует на встроенный код, который получается при использовании значения `single_backticks`. Значением этого атрибута должна быть строка без пробелов, обычно в нижнем регистре; примеры: `python`, `bash`, `json`.
+
+**Пример использования атрибутов wrap_code и code_language:**
 
 ```markdown
 <include src="path/to/some/config.yaml"
@@ -144,100 +227,51 @@ wrap_code="triple_backticks" code_language="yaml">
 </include>
 ```
 
-#### Attributes
+#### Дополнительные атрибуты, которы поддерживаются в обеих версиях синтаксиса includes
 
-`src`
-:   Path to the local file to include.
+1. `sethead`
 
-`url`
-:   HTTP(S) URL of the content that should be included.
+   Уровень самого верхнего заголовка во включенном контенте. Используйте его, чтобы гарантировать, что включенный текст не нарушает порядок заголовков родительского документа:
 
-`repo_url`
-:   Full remote Git repository URL without a revision.
+    ```markdown
+    # Заголовок
 
-`path`
-:   Path to the file inside the remote Git repository.
+    ## Подзаголовок
 
->    **Note**
->    
->    Path parameter is required!
-        Its absence will lead to incorrect operation Foliant.
+    <include src="other.md" sethead="3"></include>
+    ```
 
->    **Note**
->
->    If you are using the new syntax, the `src` attribute is required to include a local file, `url` is required to include a remote file, and the `repo_url` and `path` attributes are required to include a file from a remote Git repository. All other attributes are optional.
+2. `nohead`
 
->    **Note**
->
->    Foliant 1.0.9 supports the processing of attribute values as YAML. You can precede the values of attributes by the `!path`, `!project_path`, and `!rel_path` modifiers (i.e. YAML tags). These modifiers can be useful in the `src`, `path`, and `project_root` attributes.
+   Флаг, указывающий препроцессору удалить начальный заголовок из включенного содержимого:
 
-`revision`
-:   Revision of the Git repository.
+    ```markdown
+    # My Custom Heading
 
-`from_heading`
-:   Full content of the starting heading when it’s necessary to include some part of the referenced file content. If the `to_heading`, `to_id`, or `to_end` attribute is not specified, the preprocessor cuts the included content to the next heading of the same level. *The referenced heading is included.*
+    <include src="other.md" from_heading="Original Heading" nohead="true"></include>\
+    ```
 
-`to_heading`
-:   Full content of the ending heading when it’s necessary to include some part of the referenced file content. *The referenced heading will not be included.*
+    По умолчанию установлен в `false`.
 
-`from_id`
-:   ID of the starting heading or starting anchor when it’s necessary to include some part of the referenced file content. The `from_id` attribute has higher priority than `from_heading`. If the `to_heading`, `to_id`, or `to_end` attribute is not specified, the preprocessor cuts the included content to the next heading of the same level. *The referenced id is included.*
+    По умолчанию начальный заголовок включается в выходные данные, а конечный заголовок - нет. Начальный и конечный якоря никогда не включаются в выходные данные.
 
-> **NOTE:** If you want `from_id` and `to_id` features to work with [anchors](https://foliant-docs.github.io/docs/preprocessors/anchors/), make sure that anchors preprocessor is listed *after* includes in foliant.yml.
+3. `inline`
 
-`to_id`
-:   ID of the ending heading or ending anchor when it’s necessary to include some part of the referenced file content. The `to_id` attribute has higher priority than `to_heading`. *The referenced id will not be included.*
+   Флаг, который сообщает препроцессору заменить последовательности пробельных символов многих видов (включая `\r`, `\n` и `\t`) одиночными пробелами (` `) во включенном содержимом, а затем удалить начальные и конечные пробелы.
+   Можно использовать в однострочных ячейках таблицы.
+   Значение по умолчанию - `false`.
 
-`to_end`
-:   Flag that tells the preprocessor to cut to the end of the included content. Otherwise, if `from_heading` or `from_id` is specified, the preprocessor cuts the included content to the next heading of the same level as the starting heading, or the heading that precedes the starting anchor.
+4. `project_root`
+   
+   Путь к каталогу верхнего уровня (“root”) проекта Foliant, к которому принадлежит включенный файл. Этот параметр может потребоваться для правильного разрешения модификаторов `!path` и `!project_path` во включенном контенте.
 
-    Example:
-
-        ## Some Heading {#custom_id}
-
-        <anchor>one_more_custom_id</anchor>
-
-    Here `Some Heading {#custom_id}` is the full content of the heading, `custom_id` is its ID, and `one_more_custom_id` is the ID of the anchor.
-
-`wrap_code`
-:   Attribute that allows to mark up the included content as fence code block or inline code by wrapping the content with additional Markdown syntax constructions. Available values are: `triple_backticks`—to add triple backticks separated with newlines before and after the included content; `triple_tildas`—to do the same but using triple tildas; `single_backticks`—to add single backticks before and after the included content without adding extra newlines. Note that this attribute doesn’t affect the included content. So if the content consists of multiple lines, and the `wrap_code` attribute with the value `single_backticks` is set, all newlines within the content will be kept. To perform forced conversion of multiple lines into one, use the `inline` attribute.
-
-`code_language`
-:   Language of the included code snippet that should be additionally marked up as fence code block by using the `wrap_code` attribute with the value `triple_backticks` or `triple_tildas`. Note that the `code_language` attribute doesn’t take effect to inline code that is obtained when the `single_backticks` value is used. The value of this attribute should be a string without whitespace characters, usually in lowercase; examples: `python`, `bash`, `json`.
-
-### Optional Attributes Supported in Both Syntax Variants
-
-`sethead`
-:   The level of the topmost heading in the included content. Use it to guarantee that the included text does not break the parent document’s heading order:
-
-        # Title
-
-        ## Subtitle
-
-        <include src="other.md" sethead="3"></include>
-
-`nohead`
-:   Flag that tells the preprocessor to strip the starting heading from the included content:
-
-        # My Custom Heading
-
-        <include src="other.md" from_heading="Original Heading" nohead="true"></include>
-
-    Default is `false`.
-
-    By default, the starting heading is included to the output, and the ending heading is not. Starting and ending anchors are never included into the output.
-
-`inline`
-:   Flag that tells the preprocessor to replace sequences of whitespace characters of many kinds (including `\r`, `\n`, and `\t`) with single spaces (` `) in the included content, and then to strip leading and trailing spaces. It may be useful in single-line table cells. Default value is `false`.
-
-`project_root`
-:   Path to the top-level (“root”) directory of Foliant project that the included file belongs to. This option may be needed to resolve the `!path` and `!project_path` modifiers in the included content properly.
-
-    >    **Note**
+    >    **Примечание**
     >
-    >    By default, if a local file is included, `project_root` points to the top-level directory of the current Foliant project, and if a file in a remote Git repository is referenced, `project_root` points to the top-level directory of this repository. In most cases you don’t need to override the default behavior.
+    >    По умолчанию, если включен локальный файл, `project_root` указывает на каталог верхнего уровня текущего проекта Foliant, а если ссылка на файл в удаленном репозитории Git, `project_root` указывает на каталог верхнего уровня этого репозитория.
+    В большинстве случаев не нужно переопределять поведение по умолчанию.
 
-Different options can be combined. For example, use both `sethead` and `nohead` if you need to include a section with a custom heading:
+Различные варианты могут быть объединены.
+Например, можно использовать как `set head`, так и `nonhead`, если нужно включить раздел с пользовательским заголовком.
 
 ```markdown
 # My Custom Heading
@@ -245,33 +279,31 @@ Different options can be combined. For example, use both `sethead` and `nohead` 
 <include src="other.md" from_heading="Original Heading" sethead="1" nohead="true"></include>
 ```
 
-### The Legacy Syntax
+### Устаревший синтаксис
 
-This syntax was the only supported in the preprocessor up to version 1.0.11. It’s weird and cryptic, you had to memorize strange rules about `$`, `#` and stuff. The new syntax described above is much cleaner.
+Устаревший синтаксис сохранен для обеспечения обратной совместимости. Чтобы использовать его, поместите ссылку на включенный файл между тегами `<include>...</include>`.
 
-The legacy syntax is kept for backward compatibility. To use it, put the reference to the included file between `<include>...</include>` tags.
-
-Local path example:
+**Пример включения локального файла:**
 
 ```markdown
-Text below is taken from another document.
+Tекст взят из другого документа.
 
 <include>path/to/another/document.md</include>
 ```
 
-The path may be either relative to currently processed Markdown file or absolute.
+Путь может быть либо относительным к обрабатываемому в данный момент файлу markdown, или абсолютным.
 
-To include a document from a remote Git repository, put its URL between `$`s before the document path:
+Чтобы включить документ из удаленного репозитория Git, поместите его URL-адрес после знака `$` перед путем к документу:
 
 ```markdown
-Text below is taken from a remote repository.
+Приведенный ниже текст взят из удаленного репозитория.
 
 <include>
     $https://github.com/foo/bar.git$path/to/doc.md
 </include>
 ```
 
-If the repository alias is defined in the project config, you can use it instead of the URL:
+Если псевдоним `alias` репозитория определен в конфигурации проекта, вы можете использовать его вместо URL:
 
 ```yaml
 - includes:
@@ -279,34 +311,34 @@ If the repository alias is defined in the project config, you can use it instead
         foo: https://github.com/foo/bar.git
 ```
 
-And then in the source:
+А затем в исходном файле:
 
 ```markdown
 <include>$foo$path/to/doc.md</include>
 ```
 
-You can also specify a particular branch or revision:
+Вы также можете указать конкретную ветку или версию:
 
 ```markdown
-Text below is taken from a remote repository on branch develop.
+Приведенный ниже текст взят из удаленного репозитория с ветки develop.
 
 <include>$foo#develop$path/to/doc.md</include>
 ```
 
-To include a part of a document between two headings, use the `#Start:Finish` syntax after the file path:
+Чтобы поместить часть документа между двумя заголовками, используйте синтаксис `#Start:Finish` после пути к файлу:
 
 ```markdown
-Include content from “Intro” up to “Credits”:
+Включен контент от “Intro” до “Credits”:
 
 <include>sample.md#Intro:Credits</include>
 
-Include content from start up to “Credits”:
+Включен контент от начала до “Credits”:
 
 <include>sample.md#:Credits</include>
 
-Include content from “Intro” up to the next heading of the same level:
+включить содержимое от “Intro” до следующего заголовка того же уровня:
 
 <include>sample.md#Intro</include>
 ```
 
-In the legacy syntax, problems may occur with the use of `$`, `#`, and `:` characters in filenames and headings, since these characters may be interpreted as delimiters.
+В устаревшем синтаксисе могут возникнуть проблемы с использованием символов `$`, `#` и `:` в именах файлов и заголовках, поскольку эти символы могут интерпретироваться как разделители.
